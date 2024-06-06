@@ -18,7 +18,7 @@
     {% endfor %}
     <p class="fw-bold">Total Cost + USD. 70  = {{totalcost}}</p>
     <small>(USD. 70 Delivery Charge)</small> <hr>
-    <small>Term and Condition: Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia, ullam saepe! Iure optio repellat dolor velit, minus rem. Facilis cumque neque numquam laboriosam, accusantium adipisci nisi nihil in et quis?</small>
+    <a href="https://www.narakathegame.com/news/update/useragreement.html" target="_blank" style="color: blue; text-decoration: underline; font-size: 18px; font-weight: bold;">Term and Condition</a>
   </div>
   <div class="col-sm-4 offset-sm-1">
     <h4>Select Shipping Address</h4>
@@ -38,9 +38,8 @@
         </div>
       {% endfor %}
         <div class="border p-3">
-          {% comment %} <button type="submit" class="btn btn-warning mt-3 px-5 fw-bold" id="continuebtn">Continue</button> {% endcomment %}
-          <!-- Set up a container element for the button -->
           <p class="fw-bold">Payment Options:</p>
+          <button type="submit" class="btn btn-warning mb-3 px-4 fw-bold" id="cod-btn">Ship COD (Cash on Delivery - Pay When You Receive Your Order)</button>
           <div id="paypal-button-container"></div>
         </div>
       </form>
@@ -82,3 +81,11 @@
     </script>
 
 {% endblock payment-gateway %}
+
+{% block codpayment %}
+<script>
+    document.getElementById("cod-btn").addEventListener("click", function() {
+        document.getElementById("myform").submit();
+    });
+</script>
+{% endblock codpayment %}

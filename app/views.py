@@ -7,7 +7,9 @@ from django.http import JsonResponse
 from django.db.models import Q
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
-
+from .models import Product, Comment
+from .forms import CommentForm
+from django.contrib.auth import logout
 class ProductView(View):
     def get(self, request):
         totalitem = 0
@@ -20,16 +22,30 @@ class ProductView(View):
         return render(request, 'app/home.html', {'mobiles': mobiles, 'laptops': laptops, 'totalitem': totalitem, 'iphones': iphones, 'samsungs': samsungs})
 
 class ProductDetailView(View):
-	def get(self, request, pk):
-		totalitem = 0
-		product = Product.objects.get(pk=pk)
-		print(product.id)
-		item_already_in_cart=False
-		if request.user.is_authenticated:
-			totalitem = len(Cart.objects.filter(user=request.user))
-			item_already_in_cart = Cart.objects.filter(Q(product=product.id) & Q(user=request.user)).exists()
-		return render(request, 'app/productdetail.html', {'product':product, 'item_already_in_cart':item_already_in_cart, 'totalitem':totalitem})
+    def get(self, request, pk):
+        totalitem = 0
+        product = Product.objects.get(pk=pk)
+        comments = product.comments.all()
+        comment_form = CommentForm()
+        item_already_in_cart = False
+        if request.user.is_authenticated:
+            totalitem = len(Cart.objects.filter(user=request.user))
+            item_already_in_cart = Cart.objects.filter(Q(product=product.id) & Q(user=request.user)).exists()
+        return render(request, 'app/productdetail.html', {'product': product, 'item_already_in_cart': item_already_in_cart, 'totalitem': totalitem, 'comments': comments, 'comment_form': comment_form})
 
+    @method_decorator(login_required)
+    def post(self, request, pk):
+        product = Product.objects.get(pk=pk)
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            comment = comment_form.save(commit=False)
+            comment.product = product
+            comment.user = request.user
+            comment.save()
+            messages.success(request, 'Your comment has been posted!')
+            return redirect('product-detail', pk=pk)
+        comments = product.comments.all()
+        return render(request, 'app/productdetail.html', {'product': product, 'comments': comments, 'comment_form': comment_form})
 @login_required()
 def add_to_cart(request):
 	user = request.user
@@ -40,7 +56,7 @@ def add_to_cart(request):
 		product_title = Product.objects.get(id=product)
 		Cart(user=user, product=product_title).save()
 		messages.success(request, 'Product Added to Cart Successfully !!' )
-		return redirect('/cart')
+		return redirect('/')
 	else:
 		return redirect('/cart')
   # Below Code is used to return to same page
