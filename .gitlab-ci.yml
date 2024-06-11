@@ -7,11 +7,11 @@ variables:
 
 build:
   stage: build
-  image: web:latest
+  image: docker:latest
   services:
     - docker:dind
   script:
-    - docker build -t my_django_app .
+    - docker build -t shoppinglyx .
 
 deploy:
   stage: deploy
@@ -20,5 +20,6 @@ deploy:
     - docker:dind
   script:
     - echo "Deploy step - customize this according to your deployment process"
+    - docker-compose up -d
   only:
     - main
