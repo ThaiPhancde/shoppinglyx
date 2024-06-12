@@ -4,13 +4,11 @@ FROM python:3.9-slim
 # Đặt thư mục làm việc trong container
 WORKDIR /app
 
-# Copy tệp requirements.txt vào thư mục làm việc
+# Copy requirements.txt
 COPY req.txt .
 
-# Cài đặt các thư viện Python được liệt kê trong requirements.txt
 RUN pip install -r req.txt
 
-# Copy toàn bộ mã nguồn của ứng dụng Django vào thư mục làm việc
 COPY . .
 
 # Thiết lập biến môi trường
