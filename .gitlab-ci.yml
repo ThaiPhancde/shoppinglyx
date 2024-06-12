@@ -4,6 +4,10 @@ stages:
 
 variables:
   DATABASE_URL: sqlite:///app/db.sqlite3
+  DOCKER_IMAGE: "registry.gitlab.com/ThaiPhancde/shoppinglyx:latest"
+
+before_script:
+  - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
 
 build:
   stage: build
@@ -11,15 +15,18 @@ build:
   services:
     - docker:dind
   script:
-    - docker build -t shoppinglyx .
+    - docker build -t $DOCKER_IMAGE .
+    - docker push $DOCKER_IMAGE
 
 deploy:
   stage: deploy
-  image: docker:latest
+  image: docker/compose:latest
   services:
     - docker:dind
   script:
+    - docker pull $DOCKER_IMAGE
     - echo "Deploy step - customize this according to your deployment process"
+    - echo "DATABASE_URL=$DATABASE_URL" > .env
     - docker-compose up -d
   only:
     - main
