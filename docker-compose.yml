@@ -1,10 +1,52 @@
-version: '3'
-services:
-  web:
-    build: .
-    volumes:
-      - ./db.sqlite3:/app/db.sqlite3
-    ports:
-      - "8000:8000"
-    environment:
-      - DATABASE_URL=sqlite:///app/db.sqlite3
+# File: .gitlab-ci.yml
+
+# Định nghĩa các stage cho pipeline
+stages:
+  - build
+  - lint
+  - test
+  - deploy
+
+# Các biến môi trường chung sử dụng trong pipeline
+variables:
+  DATABASE_URL: sqlite:///app/db.sqlite3
+
+# Stage: Build
+build:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t shoppinglyx .
+
+# Stage: Lint
+lint:
+  stage: lint
+  image: python:3.9-slim
+  script:
+    - pip install flake8
+    - flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+
+# Stage: Test
+test:
+  stage: test
+  image: python:3.9-slim
+  script:
+    - pip install -r req.txt
+    - python manage.py test
+
+# Stage: Production Deployment
+deploy:
+  stage: deploy
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker build -t shoppinglyx:latest .
+    - docker-compose up -d
+  environment:
+    name: production
+    url: $HEROKU_APP_HOST
+  only:
+    - main  # Chỉ chạy khi push vào branch main
